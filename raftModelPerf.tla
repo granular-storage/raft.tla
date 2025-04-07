@@ -2,6 +2,7 @@
 
 EXTENDS raftSpec
 
+
 \*instrumentation and performance invariants
 
 \* A leader's maxc should remain under MaxClientRequests

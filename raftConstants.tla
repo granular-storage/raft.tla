@@ -27,5 +27,8 @@ CONSTANTS MaxBecomeLeader
 \* Maximum term number allowed in the model
 CONSTANTS MaxTerm
 
+CONSTANTS SwitchPayload \*SwitchPayload – for the full client request payload delivered via multicast.
+CONSTANTS RecoveryRequest \*RecoveryRequest (and optionally RecoveryResponse) – to support the bonus recovery mechanism.
+CONSTANTS RecoveryResponse
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu
