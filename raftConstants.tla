@@ -16,8 +16,10 @@ CONSTANTS Nil
 
 \* Message types:
 CONSTANTS RequestVoteRequest, RequestVoteResponse,
-          AppendEntriesRequest, AppendEntriesResponse
-
+          AppendEntriesRequest, AppendEntriesResponse,
+          \* --- HovercRaft Additions ---
+          RecoveryRequest, RecoveryResponse
+          
 \* for instrumentation to limit model state space
 CONSTANTS MaxClientRequests
 
