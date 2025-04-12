@@ -1,5 +1,3 @@
-Original file line number	Original file line	Diff line number	Diff line change
-@@ -1,1237 +1,111 @@
 # HovercRaft TLA+ Specification
 ## Overview
 This project implements the HovercRaft consensus algorithm. The main goal of HovercRaft is to improve the scalability of Raft, particularly the leader's bandwidth bottleneck, by separating the dissemination of large client request payloads from the ordering metadata.
