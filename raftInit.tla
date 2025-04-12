@@ -24,6 +24,7 @@ Init == /\ messages = [m \in {} |-> 0]
         /\ maxc = 0
         /\ leaderCount = [i \in Server |-> 0]
         /\ entryCommitStats = [ idx_term \in {} |-> [ sentCount |-> 0, ackCount |-> 0, committed |-> FALSE ] ] \* Initialize new variable
+        /\ switchBuffer = [s \in Server |-> <<>>] \*set switchBuffer to an empty structure for every server.
 
 \* MyInit remains unchanged for the core Raft state, entryCommitStats is handled in Init.
 MyInit ==
