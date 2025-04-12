@@ -2,16 +2,16 @@
 <launchConfiguration type="org.lamport.tla.toolbox.tool.tlc.modelCheck">
     <stringAttribute key="configurationName" value="Model_1_SnapShot_1744021914915"/>
     <intAttribute key="distributedFPSetCount" value="0"/>
-    <stringAttribute key="distributedNetworkInterface" value="10.167.35.49"/>
+    <stringAttribute key="distributedNetworkInterface" value="192.168.0.107"/>
     <intAttribute key="distributedNodesCount" value="1"/>
     <stringAttribute key="distributedTLC" value="off"/>
-    <intAttribute key="fpIndex" value="94"/>
+    <intAttribute key="fpIndex" value="12"/>
     <intAttribute key="maxHeapSize" value="25"/>
     <stringAttribute key="modelBehaviorInit" value=""/>
     <stringAttribute key="modelBehaviorNext" value=""/>
     <stringAttribute key="modelBehaviorSpec" value="MySpec"/>
     <intAttribute key="modelBehaviorSpecType" value="1"/>
-    <stringAttribute key="modelBehaviorVars" value="messages, matchIndex, log, state, leaderCount, entryCommitStats, commitIndex, currentTerm, votesResponded, maxc, nextIndex, votesGranted, voterLog, votedFor"/>
+    <stringAttribute key="modelBehaviorVars" value="pendingRequests, messages, matchIndex, log, state, leaderCount, entryCommitStats, commitIndex, currentTerm, votesResponded, maxc, nextIndex, votesGranted, missingRequests, voterLog, votedFor"/>
     <stringAttribute key="modelComments" value=""/>
     <booleanAttribute key="modelCorrectnessCheckDeadlock" value="false"/>
     <listAttribute key="modelCorrectnessInvariants">
@@ -27,6 +27,7 @@
     </listAttribute>
     <listAttribute key="modelCorrectnessProperties"/>
     <intAttribute key="modelEditorOpenTabs" value="10"/>
+    <stringAttribute key="modelExpressionEval" value=""/>
     <stringAttribute key="modelParameterActionConstraint" value=""/>
     <listAttribute key="modelParameterConstants">
         <listEntry value="AppendEntriesResponse;;AppendEntriesResponse;1;0"/>
@@ -42,6 +43,8 @@
         <listEntry value="Value;;{&quot;v1&quot;,&quot;v2&quot;};0;0"/>
         <listEntry value="Server;;{&quot;r1&quot;,&quot;r2&quot;,&quot;r3&quot;};0;0"/>
         <listEntry value="MaxClientRequests;;2;0;0"/>
+        <listEntry value="RecoveryResponse;;RecoveryResponse;1;0"/>
+        <listEntry value="RecoveryRequest;;RecoveryRequest;1;0"/>
     </listAttribute>
     <stringAttribute key="modelParameterContraint" value="MyConstraint"/>
     <listAttribute key="modelParameterDefinitions"/>

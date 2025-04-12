@@ -2,20 +2,20 @@
 TLC2 Version 2.16 of 31 December 2020 (rev: cdddf55)
 @!@!@ENDMSG 2262 @!@!@
 @!@!@STARTMSG 2187:0 @!@!@
-Running breadth-first search Model-Checking with fp 12 and seed -7912238373471327911 with 4 workers on 8 cores with 901MB heap and 2024MB offheap memory [pid: 10920] (Windows 10 10.0 amd64, AdoptOpenJDK 14.0.1 x86_64, OffHeapDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 17 and seed -4629488263611357523 with 4 workers on 8 cores with 901MB heap and 2024MB offheap memory [pid: 17492] (Windows 10 10.0 amd64, AdoptOpenJDK 14.0.1 x86_64, OffHeapDiskFPSet, DiskStateQueue).
 @!@!@ENDMSG 2187 @!@!@
 @!@!@STARTMSG 2220:0 @!@!@
 Starting SANY...
 @!@!@ENDMSG 2220 @!@!@
-Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1_SnapShot_1744021914915\MC.tla
-Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1_SnapShot_1744021914915\raftModelPerf.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\MC.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\raftModelPerf.tla
 Parsing file C:\Users\parsa\Downloads\toolbox\plugins\org.lamport.tlatools_1.0.0.202012311918\tla2sany\StandardModules\TLC.tla
-Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1_SnapShot_1744021914915\raftSpec.tla
-Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1_SnapShot_1744021914915\raftActionsSolution.tla
-Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1_SnapShot_1744021914915\raftInit.tla
-Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1_SnapShot_1744021914915\raftHelpers.tla
-Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1_SnapShot_1744021914915\raftVariables.tla
-Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1_SnapShot_1744021914915\raftConstants.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\raftSpec.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\raftActionsSolution.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\raftInit.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\raftHelpers.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\raftVariables.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\raftConstants.tla
 Parsing file C:\Users\parsa\Downloads\toolbox\plugins\org.lamport.tlatools_1.0.0.202012311918\tla2sany\StandardModules\Naturals.tla
 Parsing file C:\Users\parsa\Downloads\toolbox\plugins\org.lamport.tlatools_1.0.0.202012311918\tla2sany\StandardModules\FiniteSets.tla
 Parsing file C:\Users\parsa\Downloads\toolbox\plugins\org.lamport.tlatools_1.0.0.202012311918\tla2sany\StandardModules\Sequences.tla
@@ -35,13 +35,13 @@ Semantic processing of module MC
 SANY finished.
 @!@!@ENDMSG 2219 @!@!@
 @!@!@STARTMSG 2185:0 @!@!@
-Starting... (2025-04-12 23:53:00)
+Starting... (2025-04-13 00:03:28)
 @!@!@ENDMSG 2185 @!@!@
 @!@!@STARTMSG 2189:0 @!@!@
 Computing initial states...
 @!@!@ENDMSG 2189 @!@!@
 @!@!@STARTMSG 2190:0 @!@!@
-Finished computing initial states: 1 distinct state generated at 2025-04-12 23:53:01.
+Finished computing initial states: 1 distinct state generated at 2025-04-13 00:03:29.
 @!@!@ENDMSG 2190 @!@!@
 @!@!@STARTMSG 2109:1 @!@!@
 Successor state is not completely specified by action AdvanceCommitIndex of the next-state relation. The following variables are not assigned: missingRequests, pendingRequests.
@@ -99,7 +99,7 @@ The behavior up to this point is:
 
 @!@!@ENDMSG 2217 @!@!@
 @!@!@STARTMSG 2201:0 @!@!@
-The coverage statistics at 2025-04-12 23:53:01
+The coverage statistics at 2025-04-13 00:03:29
 @!@!@ENDMSG 2201 @!@!@
 @!@!@STARTMSG 2773:0 @!@!@
 <MyInit line 34, col 1 to line 34, col 6 of module raftInit>: 1:1
@@ -327,10 +327,10 @@ The coverage statistics at 2025-04-12 23:53:01
   line 354, col 8 to line 354, col 88 of module raftActionsSolution: 0
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2772:0 @!@!@
-<ClientMulticast line 129, col 1 to line 129, col 18 of module raftActionsSolution>: 4:6
+<ClientMulticast line 129, col 1 to line 129, col 18 of module raftActionsSolution>: 5:8
 @!@!@ENDMSG 2772 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 130, col 8 to line 130, col 31 of module raftActionsSolution: 6
+  line 130, col 8 to line 130, col 31 of module raftActionsSolution: 8
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   |line 130, col 8 to line 130, col 11 of module raftActionsSolution: 10
@@ -339,19 +339,19 @@ The coverage statistics at 2025-04-12 23:53:01
   |line 130, col 15 to line 130, col 31 of module raftActionsSolution: 10
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 131, col 8 to line 131, col 72 of module raftActionsSolution: 6
+  line 131, col 8 to line 131, col 72 of module raftActionsSolution: 8
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 132, col 8 to line 132, col 23 of module raftActionsSolution: 6
+  line 132, col 8 to line 132, col 23 of module raftActionsSolution: 8
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 133, col 8 to line 134, col 67 of module raftActionsSolution: 6
+  line 133, col 8 to line 134, col 67 of module raftActionsSolution: 8
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2772:0 @!@!@
-<LeaderOrderRequest line 140, col 1 to line 140, col 24 of module raftActionsSolution>: 4:4
+<LeaderOrderRequest line 140, col 1 to line 140, col 24 of module raftActionsSolution>: 3:3
 @!@!@ENDMSG 2772 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 141, col 8 to line 141, col 24 of module raftActionsSolution: 34
+  line 141, col 8 to line 141, col 24 of module raftActionsSolution: 33
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   |line 141, col 8 to line 141, col 15 of module raftActionsSolution: 30
@@ -360,7 +360,7 @@ The coverage statistics at 2025-04-12 23:53:01
   |line 141, col 19 to line 141, col 24 of module raftActionsSolution: 30
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 142, col 8 to line 142, col 31 of module raftActionsSolution: 14
+  line 142, col 8 to line 142, col 31 of module raftActionsSolution: 13
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   |line 142, col 8 to line 142, col 8 of module raftActionsSolution: 10
@@ -369,16 +369,16 @@ The coverage statistics at 2025-04-12 23:53:01
   |line 142, col 14 to line 142, col 31 of module raftActionsSolution: 10
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 151, col 12 to line 151, col 44 of module raftActionsSolution: 4
+  line 151, col 12 to line 151, col 44 of module raftActionsSolution: 3
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 152, col 12 to line 152, col 86 of module raftActionsSolution: 4
+  line 152, col 12 to line 152, col 86 of module raftActionsSolution: 3
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 153, col 12 to line 157, col 35 of module raftActionsSolution: 4
+  line 153, col 12 to line 157, col 35 of module raftActionsSolution: 3
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 158, col 12 to line 159, col 59 of module raftActionsSolution: 4
+  line 158, col 12 to line 159, col 59 of module raftActionsSolution: 3
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2772:0 @!@!@
 <AdvanceCommitIndex line 390, col 1 to line 390, col 21 of module raftActionsSolution>: 0:5
@@ -462,10 +462,10 @@ The coverage statistics at 2025-04-12 23:53:01
   ||||||line 42, col 17 to line 42, col 21 of module raftHelpers: 54
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  ||||||line 42, col 28 to line 42, col 28 of module raftHelpers: 8
+  ||||||line 42, col 28 to line 42, col 28 of module raftHelpers: 6
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  ||||||line 42, col 35 to line 42, col 35 of module raftHelpers: 46
+  ||||||line 42, col 35 to line 42, col 35 of module raftHelpers: 48
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   |||||line 94, col 25 to line 94, col 35 of module raftSpec: 54
@@ -555,10 +555,10 @@ The coverage statistics at 2025-04-12 23:53:01
   line 24, col 8 to line 29, col 20 of module raftModelPerf: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 25, col 22 to line 25, col 42 of module raftModelPerf: 4
+  |line 25, col 22 to line 25, col 42 of module raftModelPerf: 3
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 26, col 12 to line 29, col 20 of module raftModelPerf: 4
+  |line 26, col 12 to line 29, col 20 of module raftModelPerf: 3
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   |line 24, col 19 to line 24, col 41 of module raftModelPerf: 9
@@ -567,14 +567,14 @@ The coverage statistics at 2025-04-12 23:53:01
 End of statistics.
 @!@!@ENDMSG 2202 @!@!@
 @!@!@STARTMSG 2200:0 @!@!@
-Progress(4) at 2025-04-12 23:53:02: 13 states generated (312 s/min), 9 distinct states found (216 ds/min), 5 states left on queue.
+Progress(4) at 2025-04-13 00:03:29: 14 states generated (354 s/min), 9 distinct states found (228 ds/min), 5 states left on queue.
 @!@!@ENDMSG 2200 @!@!@
 @!@!@STARTMSG 2199:0 @!@!@
-13 states generated, 9 distinct states found, 5 states left on queue.
+14 states generated, 9 distinct states found, 5 states left on queue.
 @!@!@ENDMSG 2199 @!@!@
 @!@!@STARTMSG 2194:0 @!@!@
 The depth of the complete state graph search is 4.
 @!@!@ENDMSG 2194 @!@!@
 @!@!@STARTMSG 2186:0 @!@!@
-Finished in 2508ms at (2025-04-12 23:53:02)
+Finished in 2397ms at (2025-04-13 00:03:29)
 @!@!@ENDMSG 2186 @!@!@
