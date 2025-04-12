@@ -15,12 +15,17 @@ InitLeaderVars == /\ nextIndex  = [i \in Server |-> [j \in Server |-> 1]]
                   /\ matchIndex = [i \in Server |-> [j \in Server |-> 0]]
 InitLogVars == /\ log          = [i \in Server |-> << >>]
                /\ commitIndex  = [i \in Server |-> 0]
+InitHovercraftVars ==
+    /\ pendingRequests = [i \in Server |-> {}]
+    /\ missingRequests = [i \in Server |-> {}]
+    
 Init == /\ messages = [m \in {} |-> 0]
         /\ InitHistoryVars
         /\ InitServerVars
         /\ InitCandidateVars
         /\ InitLeaderVars
         /\ InitLogVars
+        /\ InitHovercraftVars \* Add Hovercraft Vars Init
         /\ maxc = 0
         /\ leaderCount = [i \in Server |-> 0]
         /\ entryCommitStats = [ idx_term \in {} |-> [ sentCount |-> 0, ackCount |-> 0, committed |-> FALSE ] ] \* Initialize new variable
@@ -46,7 +51,10 @@ MyInit ==
     /\ votesGranted = [s \in Server |-> IF s = r2 THEN {r1, r3} ELSE {}]
     /\ votesResponded = [s \in Server |-> IF s = r2 THEN {r1, r3} ELSE {}]
     /\ entryCommitStats = [ idx_term \in {} |-> [ sentCount |-> 0, ackCount |-> 0, committed |-> FALSE ] ] \* Initialize here too
-
+    \* Initialize Hovercraft Vars for MyInit too
+    /\ pendingRequests = [i \in Server |-> {}]
+    /\ missingRequests = [i \in Server |-> {}]
+    
 \* to be used directly in model Init the value
 \*MyInit2 ==
 \*    /\  commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)

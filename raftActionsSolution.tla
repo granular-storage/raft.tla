@@ -122,12 +122,50 @@ DropStaleResponse(i, j, m) ==
     /\ Discard(m)
     /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars>>
 
+\***************************** HovercRaft Additions  **********************************************
+
+\* --- HovercRaft Change: Client Interaction ---
+\* Simulate the Switch multicasting a client request payload 'v' to all servers.
+ClientMulticast(v) ==
+    /\ maxc < MaxClientRequests \* Still apply global request limit
+    /\ pendingRequests' = [i \in Server |-> pendingRequests[i] \cup {v}]
+    /\ maxc' = maxc + 1 \* Increment count when request enters the system
+    /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, logVars,
+                   leaderCount, entryCommitStats, missingRequests>>
+
+
+\* --- HovercRaft Change: Leader orders a request ---
+\* Leader 'i' chooses a pending request 'v' to include in its log.
+\* This replaces the original ClientRequest logic.
+LeaderOrderRequest(i, v) ==
+    /\ state[i] = Leader
+    /\ v \in pendingRequests[i] \* Leader must have received the multicast
+    /\ LET entryTerm == currentTerm[i]
+           entry == [term |-> entryTerm, value |-> v] \* Entry contains metadata (term, value=request_id)
+           \* Check if this exact value (request ID) is already *ordered* in the log
+           alreadyOrdered == \E idx \in DOMAIN log[i] : log[i][idx].value = v
+           newLog == IF alreadyOrdered THEN log[i] ELSE Append(log[i], entry)
+           newEntryIndex == IF alreadyOrdered THEN 0 ELSE Len(log[i]) + 1 \* 0 if not new
+           newEntryKey == <<newEntryIndex, entryTerm>>
+       IN
+        /\ log' = [log EXCEPT ![i] = newLog]
+        /\ pendingRequests' = [pendingRequests EXCEPT ![i] = pendingRequests[i] \ {v}] \* Remove from leader's pending
+        /\ entryCommitStats' =
+              IF /\ newEntryIndex > 0 \* Only add stats for newly ordered entries
+                 /\ newEntryKey \notin DOMAIN entryCommitStats \* Avoid overwriting if somehow re-ordered
+              THEN entryCommitStats @@ (newEntryKey :> [ sentCount |-> 0, ackCount |-> 0, committed |-> FALSE ])
+              ELSE entryCommitStats
+        /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, commitIndex,
+                       maxc, leaderCount, missingRequests>> \* maxc already incremented by ClientMulticast
+
+
+
 \***************************** AppendEntries **********************************************
 
-\* Modified. Leader i receives a client request to add v to the log. up to MaxClientRequests.
+\* Original ClientRequest - Keep definition but EXCLUDE from Next state for HovercRaft run
 ClientRequest(i, v) ==
     /\ state[i] = Leader
-    /\ maxc < MaxClientRequests 
+    /\ maxc < MaxClientRequests
     /\ LET entryTerm == currentTerm[i]
            entry == [term |-> entryTerm, value |-> v]
            entryExists == \E j \in DOMAIN log[i] : log[i][j].value = v /\ log[i][j].term = entryTerm
@@ -146,144 +184,204 @@ ClientRequest(i, v) ==
 \* Modified. Leader i sends j an AppendEntries request containing exactly 1 entry. It was up to 1 entry.
 \* While implementations may want to send more than 1 at a time, this spec uses
 \* just 1 because it minimizes atomic regions without loss of generality.
+\* --- HovercRaft Change: AppendEntries sends metadata only ---
+\* Leader i sends j an AppendEntries request containing exactly 1 *metadata* entry.
 AppendEntries(i, j) ==
     /\ i /= j
     /\ state[i] = Leader
-    /\ Len(log[i]) > 0  \* Only proceed if the leader has entries to send
-    /\ nextIndex[i][j] <= Len(log[i])  \*  Only proceed if there are entries to send to this follower
-    /\ matchIndex[i][j] < nextIndex[i][j] \* Only send if follower hasn't already acknowledged this index
+    /\ Len(log[i]) > 0
+    /\ nextIndex[i][j] <= Len(log[i])
+    \* /\ matchIndex[i][j] < nextIndex[i][j] \* Original condition - can remove or keep, depends on retry logic desired. Let's keep it simple for now.
     /\ LET entryIndex == nextIndex[i][j]
-           entry == log[i][entryIndex]
-           entries == << entry >>
-           entryKey == <<entryIndex, entry.term>>
+           entryMetadata == log[i][entryIndex] \* This is [term |-> t, value |-> v]
+           entries == << entryMetadata >> \* Send only the metadata entry
+           entryKey == <<entryIndex, entryMetadata.term>>
            prevLogIndex == entryIndex - 1
-           prevLogTerm == IF prevLogIndex > 0 THEN
-                              log[i][prevLogIndex].term
-                          ELSE
-                              0
-           \* Send up to 1 entry, constrained by the end of the log.
-           \* lastEntry == Min({Len(log[i]), nextIndex[i][j]})
-           \* entries == SubSeq(log[i], nextIndex[i][j], lastEntry)
-           
+           prevLogTerm == IF prevLogIndex > 0 THEN log[i][prevLogIndex].term ELSE 0
        IN Send([mtype          |-> AppendEntriesRequest,
                 mterm          |-> currentTerm[i],
                 mprevLogIndex  |-> prevLogIndex,
                 mprevLogTerm   |-> prevLogTerm,
-                mentries       |-> entries,
-                \* mlog is used as a history variable for the proof.
-                \* It would not exist in a real implementation.
-                mlog           |-> log[i],
-                mcommitIndex   |-> Min({commitIndex[i], entryIndex}), \* lastEntry}),
+                mentries       |-> entries,       \* Metadata only
+                mlog           |-> log[i],        \* Keep for history variable/proofs if needed
+                mcommitIndex   |-> Min({commitIndex[i], entryIndex -1 }), \* Commit up to previous entry
                 msource        |-> i,
                 mdest          |-> j])
        /\ entryCommitStats' =
             IF entryKey \in DOMAIN entryCommitStats /\ ~entryCommitStats[entryKey].committed
             THEN [entryCommitStats EXCEPT ![entryKey].sentCount = @ + 1]
-            ELSE entryCommitStats         
-    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount>>
+            ELSE entryCommitStats
+    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount,
+                   pendingRequests, missingRequests>>
+
+
+\* --- HovercRaft Actions: Recovery Mechanism (Helper Action) ---
+\* Note: This is defined separately for clarity but used within HandleAppendEntriesRequest
+\* Follower i sends a RecoveryRequest for payload v to leader j
+SendRecoveryRequest(i, j, v) ==
+    /\ Send([mtype         |-> RecoveryRequest,
+             mterm         |-> currentTerm[i],
+             mRequestValue |-> v,
+             msource       |-> i,
+             mdest         |-> j])
+    \* This action only modifies 'messages'. Other UNCHANGED are handled by the caller.
+
 
 \* Server i receives an AppendEntries request from server j with
 \* m.mterm <= currentTerm[i]. This just handles m.entries of length 0 or 1, but
 \* implementations could safely accept more by treating them the same as
 \* multiple independent requests of 1 entry.
+\* --- HovercRaft Change: HandleAppendEntriesRequest checks pendingRequests ---
 HandleAppendEntriesRequest(i, j, m) ==
     LET logOk == \/ m.mprevLogIndex = 0
                  \/ /\ m.mprevLogIndex > 0
                     /\ m.mprevLogIndex <= Len(log[i])
                     /\ m.mprevLogTerm = log[i][m.mprevLogIndex].term
-    IN /\ m.mterm <= currentTerm[i]
-       /\ \/ /\ \* reject request
-                \/ m.mterm < currentTerm[i]
-                \/ /\ m.mterm = currentTerm[i]
-                   /\ state[i] = Follower
-                   /\ \lnot logOk
-             /\ Reply([mtype           |-> AppendEntriesResponse,
-                       mterm           |-> currentTerm[i],
-                       msuccess        |-> FALSE,
-                       mmatchIndex     |-> 0,
-                       msource         |-> i,
-                       mdest           |-> j],
-                       m)
-             /\ UNCHANGED <<serverVars, logVars>>
-          \/ \* return to follower state
-             /\ m.mterm = currentTerm[i]
-             /\ state[i] = Candidate
-             /\ state' = [state EXCEPT ![i] = Follower]
-             /\ UNCHANGED <<currentTerm, votedFor, logVars, messages>>
-          \/ \* accept request
-             /\ m.mterm = currentTerm[i]
-             /\ state[i] = Follower
-             /\ logOk
-             /\ LET index == m.mprevLogIndex + 1
-                IN \/ \* already done with request
-                       /\ \/ m.mentries = << >>
-                          \/ /\ m.mentries /= << >>
-                             /\ Len(log[i]) >= index
-                             /\ log[i][index].term = m.mentries[1].term
-                          \* This could make our commitIndex decrease (for
-                          \* example if we process an old, duplicated request),
-                          \* but that doesn't really affect anything.
-                       /\ commitIndex' = [commitIndex EXCEPT ![i] =
-                                              m.mcommitIndex]   
-\*                       /\ commitIndex' = [commitIndex EXCEPT ![i] = 
-\*                                            IF commitIndex[i] < m.mcommitIndex THEN 
-\*                                                Min({m.mcommitIndex, Len(log[i])}) 
-\*                                            ELSE 
-\*                                                commitIndex[i]]
-                       /\ Reply([mtype           |-> AppendEntriesResponse,
-                                 mterm           |-> currentTerm[i],
-                                 msuccess        |-> TRUE,
-                                 mmatchIndex     |-> m.mprevLogIndex +
-                                                     Len(m.mentries),
-                                 msource         |-> i,
-                                 mdest           |-> j],
-                                 m)
-                       /\ UNCHANGED <<serverVars, log>>
-                   \/ \* conflict: remove 1 entry (simplified from original spec - assumes entry length 1)
-                      \* since we do not send empty entries, we have to provide a larger set of values to ensure some progress
-                       /\ m.mentries /= << >>
-                       /\ Len(log[i]) >= index
-                       /\ log[i][index].term /= m.mentries[1].term
-                       /\ LET newLog == SubSeq(log[i], 1, index - 1) \* Truncate log
-                          IN log' = [log EXCEPT ![i] = newLog]
-\*                       /\ LET new == [index2 \in 1..(Len(log[i]) - 1) |->
-\*                                          log[i][index2]]
-\*                          IN log' = [log EXCEPT ![i] = new]
-                       /\ UNCHANGED <<serverVars, commitIndex, messages>>
-                   \/ \* no conflict: append entry
-                       /\ m.mentries /= << >>
-                       /\ Len(log[i]) = m.mprevLogIndex
-                       /\ log' = [log EXCEPT ![i] =
-                                      Append(log[i], m.mentries[1])]
-                       /\ UNCHANGED <<serverVars, commitIndex, messages>>
-       /\ UNCHANGED <<candidateVars, leaderVars, instrumentationVars>> \* entryCommitStats unchanged on followers
+        acceptRequestLogic(newState) ==
+            /\ m.mterm = currentTerm[i]
+            /\ newState = Follower \* Must be follower to accept
+            /\ logOk
+            /\ LET index == m.mprevLogIndex + 1
+               IN \/ \* Heartbeat or already have this exact entry
+                     /\ \/ m.mentries = << >>
+                        \/ /\ Len(log[i]) >= index
+                           /\ log[i][index] = m.mentries[1] \* Compare full metadata entry
+                     /\ commitIndex' = [commitIndex EXCEPT ![i] = m.mcommitIndex]
+                     /\ Reply([mtype           |-> AppendEntriesResponse,
+                               mterm           |-> currentTerm[i],
+                               msuccess        |-> TRUE,
+                               mmatchIndex     |-> m.mprevLogIndex + Len(m.mentries),
+                               msource         |-> i,
+                               mdest           |-> j], m)
+                     /\ UNCHANGED <<serverVars, log, pendingRequests, missingRequests>>
+                  \/ \* Conflict: remove entries (same logic as before)
+                     /\ m.mentries /= << >>
+                     /\ Len(log[i]) >= index
+                     /\ log[i][index].term /= m.mentries[1].term
+                     /\ LET newLog == SubSeq(log[i], 1, index - 1)
+                        IN log' = [log EXCEPT ![i] = newLog]
+                     \* Reply implicitly handled by leader retry on failure (no Reply action here)
+                     /\ UNCHANGED <<serverVars, commitIndex, messages, pendingRequests, missingRequests>>
+                  \/ \* Append new entry: Check for payload before appending
+                     /\ m.mentries /= << >>
+                     /\ Len(log[i]) = m.mprevLogIndex
+                     /\ LET entryMetadata == m.mentries[1]
+                           payloadValue == entryMetadata.value
+                        IN \/ \* Payload IS available
+                              /\ payloadValue \in pendingRequests[i] \* Condition
+                              /\ log' = [log EXCEPT ![i] = Append(log[i], entryMetadata)] \* Update
+                              /\ pendingRequests' = [pendingRequests EXCEPT ![i] = pendingRequests[i] \ {payloadValue}] \* Update
+                              /\ commitIndex' = [commitIndex EXCEPT ![i] = m.mcommitIndex] \* Update
+                              /\ Reply([mtype           |-> AppendEntriesResponse, \* Update (messages')
+                                        mterm           |-> currentTerm[i],
+                                        msuccess        |-> TRUE,
+                                        mmatchIndex     |-> index,
+                                        msource         |-> i,
+                                        mdest           |-> j], m)
+                              /\ UNCHANGED <<serverVars, missingRequests>> \* Update (others)
 
-\* Server i receives an AppendEntries response from server j with
-\* m.mterm = currentTerm[i].
+                           \/ \* Payload is MISSING
+                              /\ payloadValue \notin pendingRequests[i] \* Condition
+                              /\ Reply([mtype           |-> AppendEntriesResponse, \* Update (messages') - Always reply FALSE if missing
+                                        mterm           |-> currentTerm[i],
+                                        msuccess        |-> FALSE,
+                                        mmatchIndex     |-> m.mprevLogIndex,
+                                        msource         |-> i,
+                                        mdest           |-> j], m)
+                              /\ IF payloadValue \notin missingRequests[i] \* Condition for *specific* updates when missing
+                                 THEN /\ SendRecoveryRequest(i, j, payloadValue) \* Update (messages' again)
+                                      /\ missingRequests' = [missingRequests EXCEPT ![i] = missingRequests[i] \cup {payloadValue}] \* Update (missingRequests')
+                                 ELSE /\ UNCHANGED <<messages, missingRequests>> \* Update (no change to these if already requested)
+                              /\ UNCHANGED <<serverVars, log, commitIndex, pendingRequests>> \* Update (others)
+
+    IN /\ m.mterm <= currentTerm[i]  \* Overall precondition
+       /\ ( \* Start of main disjunction for handling paths
+             \/ /\ \* Path 1: Reject request
+                   ( \/ m.mterm < currentTerm[i]  \* Guard condition 1 for rejection
+                     \/ /\ m.mterm = currentTerm[i] \* Guard condition 2 for rejection
+                        /\ state[i] = Follower
+                        /\ \lnot logOk
+                   ) \* End of rejection guard condition
+                   /\ Reply([mtype           |-> AppendEntriesResponse, \* Action if rejected
+                             mterm           |-> currentTerm[i],
+                             msuccess        |-> FALSE,
+                             mmatchIndex     |-> 0,
+                             msource         |-> i,
+                             mdest           |-> j], m)
+                   /\ UNCHANGED <<serverVars, logVars, pendingRequests, missingRequests>> \* State if rejected
+
+             \/ /\ \* Path 2: Step down if candidate
+                   m.mterm = currentTerm[i]
+                   /\ state[i] = Candidate
+                   /\ state' = [state EXCEPT ![i] = Follower] \* Action if stepping down
+                   /\ UNCHANGED <<currentTerm, votedFor, logVars, messages, pendingRequests, missingRequests>> \* State if stepping down
+
+             \/ /\ \* Path 3: Accept request (or trigger recovery)
+                   acceptRequestLogic(state[i]) \* This LET definition contains the complex logic for accepting/recovering
+                   /\ UNCHANGED <<candidateVars, leaderVars>> \* acceptRequestLogic handles relevant state changes, these vars not involved
+
+          ) \* End of main disjunction
+       /\ UNCHANGED <<instrumentationVars>> \* entryCommitStats unchanged on followers generally
+
+
+\* Leader i handles RecoveryRequest for value v from follower j
+\* Leader checks its *log* to see if it has ordered this value.
+\* Simplification: Assume leader has the payload if it's in its log.
+HandleRecoveryRequest(i, j, m) ==
+    LET requestedValue == m.mRequestValue
+        \* Check if the leader has ordered this value (i.e., it's in the log)
+        hasValue == \E idx \in DOMAIN log[i] : log[i][idx].value = requestedValue
+    IN /\ m.mterm <= currentTerm[i] \* Ignore stale requests, respond with current term if lower
+       /\ IF hasValue
+          THEN Reply([mtype         |-> RecoveryResponse,
+                      mterm         |-> currentTerm[i],
+                      mRequestValue |-> requestedValue,
+                      \* No separate payload field needed if Value is the payload
+                      msource       |-> i,
+                      mdest         |-> j], m)
+          ELSE Discard(m) \* Leader doesn't have it (maybe lost leadership?), ignore.
+       /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars,
+                      pendingRequests, missingRequests>>
+
+\* Follower i handles RecoveryResponse for value v from leader j
+HandleRecoveryResponse(i, j, m) ==
+    /\ m.mterm = currentTerm[i] \* Precondition
+    /\ ( LET recoveredValue == m.mRequestValue \* Group the LET...IN block
+         IN /\ pendingRequests' = [pendingRequests EXCEPT ![i] = pendingRequests[i] \cup {recoveredValue}]
+            /\ missingRequests' = [missingRequests EXCEPT ![i] = missingRequests[i] \ {recoveredValue}]
+            /\ Discard(m)
+       ) \* End group
+    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars>>
+
+
+\* HandleAppendEntriesResponse: No changes needed for HovercRaft core logic.
 HandleAppendEntriesResponse(i, j, m) ==
     /\ m.mterm = currentTerm[i]
+    /\ state[i] = Leader \* Only leaders process these responses
     /\ \/ /\ m.msuccess \* successful
-          /\ LET \*newMatchIndex == IF matchIndex[i][j] > m.mmatchIndex THEN matchIndex[i][j] ELSE m.mmatchIndex
-                 newMatchIndex == m.mmatchIndex
+          /\ LET newMatchIndex == m.mmatchIndex
+                 \* Find the corresponding entry key using the acknowledged index
                  entryKey == IF newMatchIndex > 0 /\ newMatchIndex <= Len(log[i])
                               THEN <<newMatchIndex, log[i][newMatchIndex].term>>
                               ELSE <<0, 0>> \* Invalid index or empty log
-             IN \*/\ nextIndex'  = [nextIndex  EXCEPT ![i][j] = newMatchIndex + 1]
-                /\ nextIndex'  = [nextIndex  EXCEPT ![i][j] = m.mmatchIndex + 1]
-                /\ matchIndex' = [matchIndex EXCEPT ![i][j] = m.mmatchIndex]
-                \*/\ matchIndex' = [matchIndex EXCEPT ![i][j] = newMatchIndex]
+             IN /\ nextIndex'  = [nextIndex  EXCEPT ![i][j] = newMatchIndex + 1]
+                /\ matchIndex' = [matchIndex EXCEPT ![i][j] = newMatchIndex]
                 /\ entryCommitStats' =
                      IF /\ entryKey /= <<0, 0>>
                         /\ entryKey \in DOMAIN entryCommitStats
                         /\ ~entryCommitStats[entryKey].committed
                      THEN [entryCommitStats EXCEPT ![entryKey].ackCount = @ + 1]
-                     ELSE entryCommitStats                     
+                     ELSE entryCommitStats
        \/ /\ \lnot m.msuccess \* not successful
-          /\ nextIndex' = [nextIndex EXCEPT ![i][j] =
-                               Max({nextIndex[i][j] - 1, 1})]
+          \* If follower rejected due to missing payload, leader will eventually retry AppendEntries
+          \* for that index after nextIndex[i][j] is potentially decremented here.
+          \* If follower rejected due to log mismatch (m.mterm > currentTerm[j] response implicit),
+          \* leader might decrement nextIndex based on that future response or current logic.
+          /\ nextIndex' = [nextIndex EXCEPT ![i][j] = Max({nextIndex[i][j] - 1, 1})]
           /\ UNCHANGED <<matchIndex, entryCommitStats>>
     /\ Discard(m)
-    /\ UNCHANGED <<serverVars, candidateVars, logVars, maxc, leaderCount>>
+    /\ UNCHANGED <<serverVars, candidateVars, logVars, maxc, leaderCount,
+                   pendingRequests, missingRequests>>
 
 \* Leader i advances its commitIndex.
 \* This is done as a separate step from handling AppendEntries responses,
@@ -308,14 +406,14 @@ AdvanceCommitIndex(i) ==
            committedIndexes == { k \in Nat : /\ k > commitIndex[i]
                                              /\ k <= newCommitIndex }
            \* Identify the keys in entryCommitStats corresponding to newly committed entries
-           keysToUpdate == { key \in DOMAIN entryCommitStats : key[1] \in committedIndexes }           
+           keysToUpdate == { key \in DOMAIN entryCommitStats : key[1] \in committedIndexes }
        IN /\ commitIndex' = [commitIndex EXCEPT ![i] = newCommitIndex]
           \* Update the 'committed' flag for the relevant entries in entryCommitStats
           /\ entryCommitStats' =
                [ key \in DOMAIN entryCommitStats |->
                    IF key \in keysToUpdate
                    THEN [ entryCommitStats[key] EXCEPT !.committed = TRUE ] \* Update record
-                   ELSE entryCommitStats[key] ]                             \* Keep old record       
+                   ELSE entryCommitStats[key] ]                             \* Keep old record
     /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, log, maxc, leaderCount>>
 
 \* Network state transitions
