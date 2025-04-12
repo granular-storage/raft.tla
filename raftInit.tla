@@ -46,8 +46,6 @@ MyInit ==
     /\ votesGranted = [s \in Server |-> IF s = r2 THEN {r1, r3} ELSE {}]
     /\ votesResponded = [s \in Server |-> IF s = r2 THEN {r1, r3} ELSE {}]
     /\ entryCommitStats = [ idx_term \in {} |-> [ sentCount |-> 0, ackCount |-> 0, committed |-> FALSE ] ] \* Initialize here too
-    /\ switchBuffer = [s \in Server |-> <<>>] \*set switchBuffer to an empty structure for every server.
-    
 
 \* to be used directly in model Init the value
 \*MyInit2 ==
