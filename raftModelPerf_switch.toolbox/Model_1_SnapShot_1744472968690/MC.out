@@ -2,7 +2,7 @@
 TLC2 Version 2.16 of 31 December 2020 (rev: cdddf55)
 @!@!@ENDMSG 2262 @!@!@
 @!@!@STARTMSG 2187:0 @!@!@
-Running breadth-first search Model-Checking with fp 30 and seed -8290216567457492554 with 4 workers on 8 cores with 901MB heap and 2024MB offheap memory [pid: 14440] (Windows 10 10.0 amd64, AdoptOpenJDK 14.0.1 x86_64, OffHeapDiskFPSet, DiskStateQueue).
+Running breadth-first search Model-Checking with fp 113 and seed -8683764282994052960 with 4 workers on 8 cores with 901MB heap and 2024MB offheap memory [pid: 10204] (Windows 10 10.0 amd64, AdoptOpenJDK 14.0.1 x86_64, OffHeapDiskFPSet, DiskStateQueue).
 @!@!@ENDMSG 2187 @!@!@
 @!@!@STARTMSG 2220:0 @!@!@
 Starting SANY...
@@ -35,13 +35,13 @@ Semantic processing of module MC
 SANY finished.
 @!@!@ENDMSG 2219 @!@!@
 @!@!@STARTMSG 2185:0 @!@!@
-Starting... (2025-04-12 17:51:09)
+Starting... (2025-04-12 17:49:25)
 @!@!@ENDMSG 2185 @!@!@
 @!@!@STARTMSG 2189:0 @!@!@
 Computing initial states...
 @!@!@ENDMSG 2189 @!@!@
 @!@!@STARTMSG 2190:0 @!@!@
-Finished computing initial states: 1 distinct state generated at 2025-04-12 17:51:10.
+Finished computing initial states: 1 distinct state generated at 2025-04-12 17:49:27.
 @!@!@ENDMSG 2190 @!@!@
 @!@!@STARTMSG 2109:1 @!@!@
 Successor state is not completely specified by action AdvanceCommitIndex of the next-state relation. The following variables are not assigned: missingRequests, pendingRequests.
@@ -99,7 +99,7 @@ The behavior up to this point is:
 
 @!@!@ENDMSG 2217 @!@!@
 @!@!@STARTMSG 2201:0 @!@!@
-The coverage statistics at 2025-04-12 17:51:10
+The coverage statistics at 2025-04-12 17:49:27
 @!@!@ENDMSG 2201 @!@!@
 @!@!@STARTMSG 2773:0 @!@!@
 <MyInit line 34, col 1 to line 34, col 6 of module raftInit>: 1:1
@@ -348,10 +348,10 @@ The coverage statistics at 2025-04-12 17:51:10
   line 133, col 8 to line 134, col 67 of module raftActionsSolution: 8
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2772:0 @!@!@
-<LeaderOrderRequest line 140, col 1 to line 140, col 24 of module raftActionsSolution>: 4:4
+<LeaderOrderRequest line 140, col 1 to line 140, col 24 of module raftActionsSolution>: 3:3
 @!@!@ENDMSG 2772 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 141, col 8 to line 141, col 24 of module raftActionsSolution: 34
+  line 141, col 8 to line 141, col 24 of module raftActionsSolution: 33
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   |line 141, col 8 to line 141, col 15 of module raftActionsSolution: 30
@@ -360,7 +360,7 @@ The coverage statistics at 2025-04-12 17:51:10
   |line 141, col 19 to line 141, col 24 of module raftActionsSolution: 30
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 142, col 8 to line 142, col 31 of module raftActionsSolution: 14
+  line 142, col 8 to line 142, col 31 of module raftActionsSolution: 13
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
   |line 142, col 8 to line 142, col 8 of module raftActionsSolution: 10
@@ -369,16 +369,16 @@ The coverage statistics at 2025-04-12 17:51:10
   |line 142, col 14 to line 142, col 31 of module raftActionsSolution: 10
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 151, col 12 to line 151, col 44 of module raftActionsSolution: 4
+  line 151, col 12 to line 151, col 44 of module raftActionsSolution: 3
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 152, col 12 to line 152, col 86 of module raftActionsSolution: 4
+  line 152, col 12 to line 152, col 86 of module raftActionsSolution: 3
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 153, col 12 to line 157, col 35 of module raftActionsSolution: 4
+  line 153, col 12 to line 157, col 35 of module raftActionsSolution: 3
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 158, col 12 to line 159, col 59 of module raftActionsSolution: 4
+  line 158, col 12 to line 159, col 59 of module raftActionsSolution: 3
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2772:0 @!@!@
 <AdvanceCommitIndex line 390, col 1 to line 390, col 21 of module raftActionsSolution>: 0:5
@@ -411,164 +411,170 @@ The coverage statistics at 2025-04-12 17:51:10
 <MoreThanOneLeaderInv line 83, col 1 to line 83, col 20 of module raftSpec>
 @!@!@ENDMSG 2774 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 84, col 5 to line 88, col 16 of module raftSpec: 10
+  line 84, col 5 to line 88, col 16 of module raftSpec: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 85, col 9 to line 88, col 16 of module raftSpec: 90
+  |line 85, col 9 to line 88, col 16 of module raftSpec: 81
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  ||line 85, col 10 to line 87, col 29 of module raftSpec: 90
+  ||line 85, col 10 to line 87, col 29 of module raftSpec: 81
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |||line 85, col 13 to line 85, col 43 of module raftSpec: 90
+  |||line 85, col 13 to line 85, col 43 of module raftSpec: 81
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |||line 86, col 13 to line 86, col 29 of module raftSpec: 90
+  |||line 86, col 13 to line 86, col 29 of module raftSpec: 81
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |||line 87, col 13 to line 87, col 29 of module raftSpec: 30
+  |||line 87, col 13 to line 87, col 29 of module raftSpec: 27
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  ||line 88, col 12 to line 88, col 16 of module raftSpec: 10
+  ||line 88, col 12 to line 88, col 16 of module raftSpec: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 84, col 16 to line 84, col 21 of module raftSpec: 10
+  |line 84, col 16 to line 84, col 21 of module raftSpec: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2774:0 @!@!@
 <LogMatchingInv line 92, col 1 to line 92, col 14 of module raftSpec>
 @!@!@ENDMSG 2774 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 93, col 5 to line 96, col 51 of module raftSpec: 10
+  line 93, col 5 to line 96, col 51 of module raftSpec: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 93, col 26 to line 96, col 51 of module raftSpec: 90
+  |line 93, col 26 to line 96, col 51 of module raftSpec: 81
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  ||line 93, col 26 to line 93, col 31 of module raftSpec: 90
+  ||line 93, col 26 to line 93, col 31 of module raftSpec: 81
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  ||line 94, col 9 to line 96, col 51 of module raftSpec: 60
+  ||line 94, col 9 to line 96, col 51 of module raftSpec: 54
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |||line 94, col 18 to line 94, col 49 of module raftSpec: 60
+  |||line 94, col 18 to line 94, col 49 of module raftSpec: 54
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  ||||line 94, col 21 to line 94, col 49 of module raftSpec: 60
+  ||||line 94, col 21 to line 94, col 49 of module raftSpec: 54
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |||||line 42, col 14 to line 42, col 35 of module raftHelpers: 60
+  |||||line 42, col 14 to line 42, col 35 of module raftHelpers: 54
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  ||||||line 42, col 17 to line 42, col 21 of module raftHelpers: 60
+  ||||||line 42, col 17 to line 42, col 21 of module raftHelpers: 54
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  ||||||line 42, col 28 to line 42, col 28 of module raftHelpers: 8
+  ||||||line 42, col 28 to line 42, col 28 of module raftHelpers: 6
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  ||||||line 42, col 35 to line 42, col 35 of module raftHelpers: 52
+  ||||||line 42, col 35 to line 42, col 35 of module raftHelpers: 48
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |||||line 94, col 25 to line 94, col 35 of module raftSpec: 60
+  |||||line 94, col 25 to line 94, col 35 of module raftSpec: 54
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |||||line 94, col 38 to line 94, col 48 of module raftSpec: 60
+  |||||line 94, col 38 to line 94, col 48 of module raftSpec: 54
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 93, col 17 to line 93, col 22 of module raftSpec: 10
+  |line 93, col 17 to line 93, col 22 of module raftSpec: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2774:0 @!@!@
 <LeaderCompletenessInv line 100, col 1 to line 100, col 21 of module raftSpec>
 @!@!@ENDMSG 2774 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 101, col 5 to line 104, col 72 of module raftSpec: 10
+  line 101, col 5 to line 104, col 72 of module raftSpec: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 102, col 9 to line 104, col 72 of module raftSpec: 30
+  |line 102, col 9 to line 104, col 72 of module raftSpec: 27
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  ||line 102, col 9 to line 102, col 25 of module raftSpec: 30
+  ||line 102, col 9 to line 102, col 25 of module raftSpec: 27
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  ||line 103, col 9 to line 104, col 72 of module raftSpec: 10
+  ||line 103, col 9 to line 104, col 72 of module raftSpec: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |||line 103, col 27 to line 104, col 72 of module raftSpec: 30
+  |||line 103, col 27 to line 104, col 72 of module raftSpec: 27
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  ||||line 103, col 27 to line 103, col 32 of module raftSpec: 30
+  ||||line 103, col 27 to line 103, col 32 of module raftSpec: 27
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  ||||line 104, col 13 to line 104, col 72 of module raftSpec: 20
+  ||||line 104, col 13 to line 104, col 72 of module raftSpec: 18
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |||line 103, col 18 to line 103, col 23 of module raftSpec: 10
+  |||line 103, col 18 to line 103, col 23 of module raftSpec: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 101, col 14 to line 101, col 19 of module raftSpec: 10
+  |line 101, col 14 to line 101, col 19 of module raftSpec: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2774:0 @!@!@
 <LogInv line 108, col 1 to line 108, col 6 of module raftSpec>
 @!@!@ENDMSG 2774 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 109, col 5 to line 111, col 51 of module raftSpec: 10
+  line 109, col 5 to line 111, col 51 of module raftSpec: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 110, col 9 to line 111, col 51 of module raftSpec: 90
+  |line 110, col 9 to line 111, col 51 of module raftSpec: 81
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 109, col 17 to line 109, col 22 of module raftSpec: 10
+  |line 109, col 17 to line 109, col 22 of module raftSpec: 9
+@!@!@ENDMSG 2221 @!@!@
+@!@!@STARTMSG 2774:0 @!@!@
+<LeaderCommitted line 42, col 1 to line 42, col 15 of module raftModelPerf>
+@!@!@ENDMSG 2774 @!@!@
+@!@!@STARTMSG 2221:0 @!@!@
+  line 43, col 5 to line 43, col 41 of module raftModelPerf: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2774:0 @!@!@
 <MaxCInv line 8, col 1 to line 8, col 7 of module raftModelPerf>
 @!@!@ENDMSG 2774 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 8, col 12 to line 8, col 77 of module raftModelPerf: 10
+  line 8, col 12 to line 8, col 77 of module raftModelPerf: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2774:0 @!@!@
 <LeaderCountInv line 11, col 1 to line 11, col 14 of module raftModelPerf>
 @!@!@ENDMSG 2774 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 11, col 19 to line 11, col 92 of module raftModelPerf: 10
+  line 11, col 19 to line 11, col 92 of module raftModelPerf: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2774:0 @!@!@
 <MaxTermInv line 14, col 1 to line 14, col 10 of module raftModelPerf>
 @!@!@ENDMSG 2774 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 14, col 15 to line 14, col 57 of module raftModelPerf: 10
+  line 14, col 15 to line 14, col 57 of module raftModelPerf: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 14, col 33 to line 14, col 57 of module raftModelPerf: 30
+  |line 14, col 33 to line 14, col 57 of module raftModelPerf: 27
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 14, col 24 to line 14, col 29 of module raftModelPerf: 10
+  |line 14, col 24 to line 14, col 29 of module raftModelPerf: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2774:0 @!@!@
 <EntryCommitMessageCountInv line 21, col 1 to line 21, col 26 of module raftModelPerf>
 @!@!@ENDMSG 2774 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  line 24, col 8 to line 29, col 20 of module raftModelPerf: 10
+  line 24, col 8 to line 29, col 20 of module raftModelPerf: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 25, col 22 to line 25, col 42 of module raftModelPerf: 4
+  |line 25, col 22 to line 25, col 42 of module raftModelPerf: 3
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 26, col 12 to line 29, col 20 of module raftModelPerf: 4
+  |line 26, col 12 to line 29, col 20 of module raftModelPerf: 3
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2221:0 @!@!@
-  |line 24, col 19 to line 24, col 41 of module raftModelPerf: 10
+  |line 24, col 19 to line 24, col 41 of module raftModelPerf: 9
 @!@!@ENDMSG 2221 @!@!@
 @!@!@STARTMSG 2202:0 @!@!@
 End of statistics.
 @!@!@ENDMSG 2202 @!@!@
 @!@!@STARTMSG 2200:0 @!@!@
-Progress(4) at 2025-04-12 17:51:11: 15 states generated (419 s/min), 10 distinct states found (279 ds/min), 6 states left on queue.
+Progress(4) at 2025-04-12 17:49:27: 14 states generated (339 s/min), 9 distinct states found (218 ds/min), 5 states left on queue.
 @!@!@ENDMSG 2200 @!@!@
 @!@!@STARTMSG 2199:0 @!@!@
-15 states generated, 10 distinct states found, 6 states left on queue.
+14 states generated, 9 distinct states found, 5 states left on queue.
 @!@!@ENDMSG 2199 @!@!@
 @!@!@STARTMSG 2194:0 @!@!@
 The depth of the complete state graph search is 4.
 @!@!@ENDMSG 2194 @!@!@
 @!@!@STARTMSG 2186:0 @!@!@
-Finished in 2171ms at (2025-04-12 17:51:11)
+Finished in 2481ms at (2025-04-12 17:49:27)
 @!@!@ENDMSG 2186 @!@!@
