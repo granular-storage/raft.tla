@@ -67,5 +67,7 @@ leaderVars == <<nextIndex, matchIndex>>
 \* All variables; used for stuttering (asserting state hasn't changed).
 vars == <<messages, serverVars, candidateVars, leaderVars, logVars, instrumentationVars>>
 
+VARIABLE switchBuffer \* track the payloads that each server receives via the switch, add a new variable (for instance, switchBuffer) that maps each server to a set or sequence of client requests.
+
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu
