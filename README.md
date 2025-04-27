@@ -90,7 +90,7 @@ Here's a breakdown of the significant changes made to the original Raft TLA+ fil
 6.  **Analyze:** Check results. No errors on `MySpec` (with safety invariants) indicates success. Violation of `MaxCInvariantForSwitchTest` on `SpecAddSwitch` is expected.
 ![image](https://github.com/user-attachments/assets/e98ac05e-f675-4ecf-9e12-72a617450fb1)
 ![image](https://github.com/user-attachments/assets/b2a5b0ad-f105-442a-ac1b-ecbbb4e08e3c)
-![image](https://github.com/user-attachments/assets/aa4931e0-10a7-431b-859f-ba57af3f565c)
+![Uploading image.png…]()
 
 ## Contributor
 *   **ovidiu-cristian**
