@@ -1,0 +1,54 @@
+@!@!@STARTMSG 2262:0 @!@!@
+TLC2 Version 2.16 of 31 December 2020 (rev: cdddf55)
+@!@!@ENDMSG 2262 @!@!@
+@!@!@STARTMSG 2187:0 @!@!@
+Running breadth-first search Model-Checking with fp 23 and seed -296166856666889611 with 4 workers on 8 cores with 901MB heap and 2024MB offheap memory [pid: 6936] (Windows 10 10.0 amd64, AdoptOpenJDK 14.0.1 x86_64, OffHeapDiskFPSet, DiskStateQueue).
+@!@!@ENDMSG 2187 @!@!@
+@!@!@STARTMSG 2220:0 @!@!@
+Starting SANY...
+@!@!@ENDMSG 2220 @!@!@
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\MC.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\raftModelPerf.tla
+Parsing file C:\Users\parsa\Downloads\toolbox\plugins\org.lamport.tlatools_1.0.0.202012311918\tla2sany\StandardModules\TLC.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\raftSpec.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\raftActionsSolution.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\raftInit.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\raftHelpers.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\raftVariables.tla
+Parsing file C:\Users\parsa\Desktop\TLA-Course\ProjectRaft\raft.tla\raftModelPerf_switch.toolbox\Model_1\raftConstants.tla
+Parsing file C:\Users\parsa\Downloads\toolbox\plugins\org.lamport.tlatools_1.0.0.202012311918\tla2sany\StandardModules\Naturals.tla
+Parsing file C:\Users\parsa\Downloads\toolbox\plugins\org.lamport.tlatools_1.0.0.202012311918\tla2sany\StandardModules\FiniteSets.tla
+Parsing file C:\Users\parsa\Downloads\toolbox\plugins\org.lamport.tlatools_1.0.0.202012311918\tla2sany\StandardModules\Sequences.tla
+Semantic processing of module Naturals
+Semantic processing of module Sequences
+Semantic processing of module FiniteSets
+Semantic processing of module TLC
+Semantic processing of module raftConstants
+Semantic processing of module raftVariables
+Semantic processing of module raftHelpers
+Semantic processing of module raftInit
+Semantic processing of module raftActionsSolution
+Semantic processing of module raftSpec
+Semantic processing of module raftModelPerf
+Semantic processing of module MC
+@!@!@STARTMSG 2219:0 @!@!@
+SANY finished.
+@!@!@ENDMSG 2219 @!@!@
+@!@!@STARTMSG 2185:0 @!@!@
+Starting... (2025-04-27 21:16:58)
+@!@!@ENDMSG 2185 @!@!@
+@!@!@STARTMSG 2189:0 @!@!@
+Computing initial states...
+@!@!@ENDMSG 2189 @!@!@
+@!@!@STARTMSG 2190:0 @!@!@
+Finished computing initial states: 1 distinct state generated at 2025-04-27 21:16:58.
+@!@!@ENDMSG 2190 @!@!@
+@!@!@STARTMSG 2200:0 @!@!@
+Progress(18) at 2025-04-27 21:17:01: 70,868 states generated (70,868 s/min), 26,684 distinct states found (26,684 ds/min), 11,734 states left on queue.
+@!@!@ENDMSG 2200 @!@!@
+@!@!@STARTMSG 2200:0 @!@!@
+Progress(25) at 2025-04-27 21:18:01: 2,507,629 states generated (2,436,761 s/min), 730,325 distinct states found (703,641 ds/min), 199,922 states left on queue.
+@!@!@ENDMSG 2200 @!@!@
+@!@!@STARTMSG 2200:0 @!@!@
+Progress(28) at 2025-04-27 21:19:01: 4,869,432 states generated (2,361,803 s/min), 1,348,640 distinct states found (618,315 ds/min), 293,491 states left on queue.
+@!@!@ENDMSG 2200 @!@!@
