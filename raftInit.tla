@@ -15,9 +15,10 @@ InitLeaderVars == /\ nextIndex  = [i \in Server |-> [j \in Server |-> 1]]
                   /\ matchIndex = [i \in Server |-> [j \in Server |-> 0]]
 InitLogVars == /\ log          = [i \in Server |-> << >>]
                /\ commitIndex  = [i \in Server |-> 0]
+\* Initialize Hovercraft related variables for ALL Nodes or just Servers as appropriate
 InitHovercraftVars ==
-    /\ pendingRequests = [i \in Server |-> {}]
-    /\ missingRequests = [i \in Server |-> {}]
+    /\ pendingRequests = [n \in Node |-> {}] \* Covers Servers and Switch
+    /\ missingRequests = [i \in Server |-> {}] \* Only Servers need this    
     
 Init == /\ messages = [m \in {} |-> 0]
         /\ InitHistoryVars
@@ -51,8 +52,8 @@ MyInit ==
     /\ votesGranted = [s \in Server |-> IF s = r2 THEN {r1, r3} ELSE {}]
     /\ votesResponded = [s \in Server |-> IF s = r2 THEN {r1, r3} ELSE {}]
     /\ entryCommitStats = [ idx_term \in {} |-> [ sentCount |-> 0, ackCount |-> 0, committed |-> FALSE ] ] \* Initialize here too
-    \* Initialize Hovercraft Vars for MyInit too
-    /\ pendingRequests = [i \in Server |-> {}]
+    \* Initialize Hovercraft Vars for MyInit explicitly for Nodes/Servers
+    /\ pendingRequests = [n \in Node |-> {}]
     /\ missingRequests = [i \in Server |-> {}]
     
 \* to be used directly in model Init the value

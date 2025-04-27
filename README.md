@@ -1,83 +1,97 @@
 # HovercRaft TLA+ Specification
+
 ## Overview
-This project implements the HovercRaft consensus algorithm. The main goal of HovercRaft is to improve the scalability of Raft, particularly the leader's bandwidth bottleneck, by separating the dissemination of large client request payloads from the ordering metadata.
+
+This project implements the HovercRaft consensus algorithm using TLA+. The main goal of HovercRaft is to improve the scalability of Raft, particularly the leader's bandwidth bottleneck, by separating the dissemination of large client request payloads from the ordering metadata. This implementation specifically models the "Switch" component as a distinct entity, following specific design requirements.
+
 ## HovercRaft vs. Standard Raft: The Core Idea
+
 *   **Standard Raft:** The client sends its request (including the full data payload) to the leader. The leader includes this payload in its log and replicates the log entry (including the payload) to followers. The leader is responsible for both ordering *and* data dissemination.
-*   **HovercRaft:** The client sends its request payload *via a "Switch"* (like IP Multicast or a dedicated proxy) directly to *all* servers (leader and followers) simultaneously. Servers temporarily store these payloads. The leader is then only responsible for ordering; it sends small *metadata* messages (referencing the client request payload) to followers. Followers match the incoming metadata with the stored payloads to reconstruct the ordered log.
+*   **HovercRaft (as implemented):**
+    1.  The client sends its request payload *only* to a distinct **Switch** entity.
+    2.  The Switch entity buffers this request.
+    3.  The Switch then disseminates the payload to *all Raft Servers* (leader and followers) simultaneously.
+    4.  Servers temporarily store these received payloads in their `pendingRequests` buffer.
+    5.  The leader is then only responsible for ordering; it selects payloads *it has received from the Switch* and sends small *metadata* messages (referencing the client request payload, e.g., using the payload value itself as an ID) to followers via standard Raft `AppendEntries`.
+    6.  Followers match the incoming metadata with the payloads stored in their `pendingRequests` buffer to reconstruct the ordered log.
+
 ## Key Changes Implemented
-*   **Switch Simulation:** Modeled the "Switch" mechanism delivering client payloads to all servers.
-*   **Payload/Metadata Separation:** Modified log entries and `AppendEntries` messages to handle only metadata (references to payloads) instead of full payloads.
-*   **Follower Buffering:** Introduced state variables for followers to store payloads received from the Switch before they are ordered by the leader.
-*   **Matching Logic:** Implemented logic for followers to match incoming ordering metadata from the leader with their buffered payloads.
-*   **Recovery Mechanism:** Added messages and logic for followers to request missing payloads from the leader if they didn't receive them via the initial multicast.
+
+*   **Distinct Switch Entity:** Modeled the "Switch" as a specific constant value (`Switch`) distinct from the Raft `Server` set. Introduced a `Node` set (`Server \union {Switch}`).
+*   **Two-Step Payload Dissemination:**
+    *   `SwitchClientRequest`: Action for client sending payload *only* to the Switch.
+    *   `SwitchDisseminate`: Action for the Switch forwarding a buffered payload to *all* Raft Servers.
+*   **Payload/Metadata Separation:** Modified log entries (`LeaderOrderRequest`) and `AppendEntries` messages to handle only metadata (references to payloads) instead of full payloads.
+*   **Server Buffering:** Introduced a `pendingRequests` state variable (a function mapping `Node` to a set of payloads) to buffer payloads: on the Switch (from clients) and on Servers (from the Switch).
+*   **Matching Logic:** Implemented logic within `HandleAppendEntriesRequest` for followers to match incoming ordering metadata from the leader with their buffered payloads (`pendingRequests[follower_id]`).
+*   **Recovery Mechanism:** Added messages (`RecoveryRequest`, `RecoveryResponse`) and logic (`Handle*`) for followers to request missing payloads from the leader if they didn't receive them via the Switch dissemination.
+
 ## Detailed Changes by Module
+
 Here's a breakdown of the significant changes made to the original Raft TLA+ files:
+
 ### `raftConstants.tla`
-*   **Added Constants:** `RecoveryRequest`, `RecoveryResponse`
-*   **Why:** These new constants define the message types needed for the payload recovery mechanism, where a follower asks the leader (or potentially peers) for a payload it missed during the multicast.
+
+*   **Added Constants:** `Switch`, `RecoveryRequest`, `RecoveryResponse`.
+*   **Added Definition:** `Node == Server \union {Switch}`.
+*   **Why:** Introduced a distinct identifier for the Switch, defined the set of all entities, and added message types for payload recovery.
+
 ### `raftVariables.tla`
-*   **Added Variables:**
-    *   `pendingRequests`: A mapping from each server ID to a *set* of `Value` (payloads).
-    *   `missingRequests`: A mapping from each server ID to a *set* of `Value` (payloads).
-*   **Why:**
-    *   `pendingRequests` acts as the temporary buffer on each server (leader and followers) to store the payloads received via the `ClientMulticast` (Switch simulation) before they are ordered by the leader's metadata.
-    *   `missingRequests` is used by followers to keep track of which payloads they have identified as missing (metadata arrived, but payload not in `pendingRequests`) and have initiated recovery for. This prevents redundant recovery requests.
-*   **Updated `vars`:** The tuple `vars` (used for `UNCHANGED` and model view) was updated to include these new variables.
+
+*   **Added/Modified Variables:**
+    *   `pendingRequests`: Declared. Intended structure is `[Node -> SUBSET Value]`. Stores client requests on the Switch, and disseminated requests on Servers.
+    *   `missingRequests`: Declared. Intended structure is `[Server -> SUBSET Value]`. Used by followers to track payloads for recovery.
+*   **Updated `vars`:** Includes these new variables.
+
 ### `raftInit.tla`
-*   **Initialization:** Added initialization for `pendingRequests` and `missingRequests` to empty sets (`{}`) for each server in both `Init` and `MyInit`.
-*   **Why:** Ensures these new state variables start in a known, empty state at the beginning of the model execution.
-### `raftActionsSolution.tla` (Major Changes Here)
-*   **`ClientMulticast(v)` Action (New):**
-    *   **What:** Takes a payload `v` and adds it to *every* server's `pendingRequests` set. Increments `maxc`.
-    *   **Why:** This action simulates the client sending its request payload via the Switch, which reliably (or unreliably, depending on how you model network loss later) delivers it to all servers' buffers simultaneously. This replaces the old `ClientRequest` for the *payload dissemination* part.
-*   **`LeaderOrderRequest(i, v)` Action (New):**
-    *   **What:** Allows the leader `i` to choose a payload `v` *that is already present in its own `pendingRequests`*. It then creates a *metadata-only* log entry `[term |-> ..., value |-> v]` and appends it to its log. It also removes `v` from its *own* `pendingRequests`.
-    *   **Why:** This models the leader's *ordering* responsibility. It only decides the order for payloads it has already received via multicast. It decouples ordering from payload reception and ensures the leader doesn't have to wait for the client directly.
-*   **`AppendEntries(i, j)` Action (Modified):**
-    *   **What:** Changed to retrieve the *metadata entry* (`[term |-> ..., value |-> v]`) from the leader's log at `nextIndex[i][j]` and send *only this metadata* in the `mentries` field of the `AppendEntriesRequest` message.
-    *   **Why:** This is the core of HovercRaft's payload separation. The leader no longer sends bulky payloads in `AppendEntries`, only the small ordering information (term and the value `v` which acts as a reference/ID).
-*   **`HandleAppendEntriesRequest(i, j, m)` Action (Modified):**
-    *   **What:** This follower logic was significantly changed:
-        1.  It still performs standard Raft checks (term, log matching via `logOk`).
-        2.  When it receives a non-empty metadata entry (`m.mentries[1]`), it extracts the payload reference (`payloadValue = m.mentries[1].value`).
-        3.  **Crucially:** It checks if `payloadValue \in pendingRequests[i]`.
-        4.  If **YES** (payload available): It appends the *metadata entry* to its log, removes `payloadValue` from `pendingRequests[i]`, and replies `msuccess = TRUE`.
-        5.  If **NO** (payload missing): It replies `msuccess = FALSE`. It then checks if `payloadValue` is already in `missingRequests[i]`. If not, it adds it to `missingRequests'` and triggers sending a `RecoveryRequest` (using the `SendRecoveryRequest` helper action).
-    *   **Why:** This implements the follower's responsibility to buffer payloads and match them with the leader's ordering metadata. It also incorporates the trigger for the recovery mechanism when a mismatch (missing payload) occurs.
-*   **`SendRecoveryRequest(i, j, v)` Action (New Helper):**
-    *   **What:** Creates and sends a `RecoveryRequest` message from follower `i` to leader `j` for payload `v`.
-    *   **Why:** Encapsulates the message sending part of the recovery process, called by `HandleAppendEntriesRequest`.
-*   **`HandleRecoveryRequest(i, j, m)` Action (New):**
-    *   **What:** Handles `RecoveryRequest` messages received by the leader `i`. It checks if its *own log* contains an entry for the requested value. If yes, it sends a `RecoveryResponse` containing the value back to the follower `j`.
-    *   **Why:** Allows the leader to serve missing payloads to followers based on its ordered log state.
-*   **`HandleRecoveryResponse(i, j, m)` Action (New):**
-    *   **What:** Handles `RecoveryResponse` messages received by follower `i`. It adds the received `recoveredValue` to its `pendingRequests` set and removes it from its `missingRequests` set.
-    *   **Why:** Completes the recovery loop. The follower now has the payload and can process the corresponding `AppendEntries` metadata when the leader retries sending it.
-*   **`ClientRequest(i, v)` Action (Original - Kept but Inactive in `Next`):**
-    *   **What:** The original action where the leader directly appends a client value.
-    *   **Why:** Kept the definition for reference/completeness, but it **must be excluded** from the `Next` state relation in `raftSpec.tla` when running the HovercRaft model to ensure only the new `ClientMulticast` -> `LeaderOrderRequest` flow is used.
+
+*   **Initialization:** Added initialization in `Init` and `MyInit`:
+    *   `pendingRequests = [n \in Node |-> {}]`
+    *   `missingRequests = [i \in Server |-> {}]`
+*   **Why:** Ensures variables start in a known, empty state.
+
+### `raftActionsSolution.tla`
+
+*   **`SwitchClientRequest(v)` (New):** Client sends `v` only to `pendingRequests[Switch]`. Increments `maxc`.
+*   **`SwitchDisseminate(v)` (New):** Switch moves `v` from `pendingRequests[Switch]` to `pendingRequests[i]` for all `i \in Server`.
+*   **`ClientMulticast(v)` (Replaced):** Replaced by the two actions above.
+*   **`LeaderOrderRequest(i, v)` (Modified):** Leader `i` orders `v` from its `pendingRequests[i]`, adds *metadata* to `log[i]`, removes `v` from `pendingRequests[i]`.
+*   **`AppendEntries(i, j)` (Modified):** Leader `i` sends *only metadata* from `log[i]` to server `j`.
+*   **`HandleAppendEntriesRequest(i, j, m)` (Modified):** Follower `i` checks `pendingRequests[i]` for payload referenced in metadata `m`. If present, appends metadata to log and removes from pending. If missing, replies `FALSE` and triggers recovery (`SendRecoveryRequest`).
+*   **`SendRecoveryRequest(i, j, v)` (New):** Creates and sends `RecoveryRequest`.
+*   **`HandleRecoveryRequest(i, j, m)` (New):** Leader `i` handles request from `j`, checks log, sends `RecoveryResponse` if found.
+*   **`HandleRecoveryResponse(i, j, m)` (New):** Follower `i` handles response from `j`, adds payload to `pendingRequests[i]`, removes from `missingRequests[i]`.
+*   **`ClientRequest(i, v)` (Inactive):** Definition kept but excluded from `Next`/`MyNext`.
+
 ### `raftSpec.tla`
-*   **`Receive(m)` Action (Modified):**
-    *   **What:** Added disjuncts (`\/ /\`) to handle the new message types `RecoveryRequest` and `RecoveryResponse` by calling their respective handler actions (`HandleRecoveryRequest`, `HandleRecoveryResponse`).
-    *   **Why:** Ensures the specification correctly routes incoming recovery messages to the appropriate logic.
-*   **`Next` / `MyNext` State Relation (Modified):**
-    *   **What:** Replaced the original `ClientRequest` action invocation with `ClientMulticast` and `LeaderOrderRequest`. The call to `Receive(m)` now implicitly covers all message types, including the new ones.
-    *   **Why:** Defines the valid state transitions for the HovercRaft model, ensuring the system evolves according to the new message flow (multicast payload -> leader orders -> leader sends metadata -> follower matches/recovers).
-### Configuration (`.cfg` File)
-*   **Constants:** Added assignments for the new constants (`RecoveryRequest = M_RecoveryRequest`, etc.).
-*   **Specification:** Ensured it points to `MySpec` (or `Spec` if using the full `Next`) which uses the HovercRaft actions.
-*   **Why:** Provides concrete values for constants needed by the TLC model checker and selects the correct behavior specification to check.
+
+*   **`Receive(m)` (Modified):** Added routing for `RecoveryRequest`/`Response`. Added `i \in Server`, `j \in Server` checks.
+*   **`Next` / `MyNext` (Modified):** Use `SwitchClientRequest`, `SwitchDisseminate`, `LeaderOrderRequest`.
+*   **`SpecAddSwitch` / `MyNextAddSwitch` (Added):** Minimal spec for testing `SwitchClientRequest`.
+
+### Configuration (`.cfg` File / Model Overview)
+
+*   **Constants:** Requires defining model values for `Server`, `Switch`, `Value`, message types, bounds (`MaxClientRequests`, etc.).
+*   **Specification:** Target `MySpec` (full check) or `SpecAddSwitch` (test).
+*   **Invariants:** Select safety invariants (`LogInv`, etc.) for `MySpec` or test invariant for `SpecAddSwitch`.
+
 ## How to Run the Model
+
 1.  **Open TLA+ Toolbox.**
-2.  **Open the Spec:** `File -> Open Spec -> Add New Spec...` and select the main `.tla` file (e.g., `raftSpec.tla`).
-3.  **Create a Model:** `TLC Model Checker -> New Model...` (e.g., name it `HovercRaftModel`).
-4.  **Configure:**
-    *   Behavior Spec: `MySpec` (or `Spec`)
-    *   Constants: Load the updated `.cfg` file or define them manually, ensuring `RecoveryRequest` and `RecoveryResponse` are included.
-    *   View: `vars`
-    *   Constraints: `MyConstraint`
-    *   Invariants: Check the desired invariants (e.g., `LogInv`, `MoreThanOneLeaderInv`, etc.).
-5.  **Run:** Click the "Run" button.
-6.  **Analyze:** Check for invariant violations and examine error traces if any occur.
+2.  **Open Spec:** Open `raftSpec.tla`.
+3.  **Create/Open Model.**
+4.  **Configure Model:**
+    *   **Behavior Spec:** `MySpec` or `SpecAddSwitch`.
+    *   **Constants:** Define `Server`, `Switch`, `Value`, bounds, etc. (e.g., `Server <- {"r1", "r2", "r3"}`, `Switch <- "sw"`, `Value <- {"v1", "v2"}`, `MaxClientRequests <- 2`).
+    *   **View:** `vars`.
+    *   **Constraints:** Add `MyConstraint`.
+    *   **Invariants:** Select appropriately (Safety invariants for `MySpec`, `MaxCInvariantForSwitchTest` for `SpecAddSwitch`).
+5.  **Run TLC.**
+6.  **Analyze:** Check results. No errors on `MySpec` (with safety invariants) indicates success. Violation of `MaxCInvariantForSwitchTest` on `SpecAddSwitch` is expected.
+![image](https://github.com/user-attachments/assets/e98ac05e-f675-4ecf-9e12-72a617450fb1)
+![image](https://github.com/user-attachments/assets/b2a5b0ad-f105-442a-ac1b-ecbbb4e08e3c)
+![image](https://github.com/user-attachments/assets/aa4931e0-10a7-431b-859f-ba57af3f565c)
+
 ## Contributor
+*   **ovidiu-cristian**
 *   **Parsa**

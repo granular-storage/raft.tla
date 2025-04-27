@@ -123,15 +123,39 @@ DropStaleResponse(i, j, m) ==
     /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars>>
 
 \***************************** HovercRaft Additions  **********************************************
-
-\* --- HovercRaft Change: Client Interaction ---
-\* Simulate the Switch multicasting a client request payload 'v' to all servers.
-ClientMulticast(v) ==
-    /\ maxc < MaxClientRequests \* Still apply global request limit
-    /\ pendingRequests' = [i \in Server |-> pendingRequests[i] \cup {v}]
+\* --- Step 1: Client sends request 'v' TO THE SWITCH ---
+SwitchClientRequest(v) ==
+    /\ maxc < MaxClientRequests \* Apply global request limit
+    \* Update only the Switch's pending requests
+    /\ pendingRequests' = [pendingRequests EXCEPT ![Switch] = @ \cup {v}]
     /\ maxc' = maxc + 1 \* Increment count when request enters the system
     /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, logVars,
                    leaderCount, entryCommitStats, missingRequests>>
+                   \* Note: pendingRequests for Server nodes are unchanged here.
+
+\* --- Step 2: Switch disseminates a pending request 'v' TO ALL SERVERS ---
+SwitchDisseminate(v) ==
+    /\ v \in pendingRequests[Switch] \* Switch must have the request
+    \* Update pendingRequests: Remove from Switch, add to all Servers
+    /\ pendingRequests' = [ n \in Node |->
+                              IF n = Switch THEN pendingRequests[n] \ {v}
+                              ELSE IF n \in Server THEN pendingRequests[n] \cup {v}
+                                   ELSE pendingRequests[n] \* Should not happen, but defensive
+                          ]
+    \* Note: maxc was already incremented by SwitchClientRequest
+    /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, logVars,
+                   maxc, leaderCount, entryCommitStats, missingRequests>>
+
+\* remove ClientMulticast(v) == ... (This action is now replaced by the two above)
+
+\*\* --- HovercRaft Change: Client Interaction ---
+\*\* Simulate the Switch multicasting a client request payload 'v' to all servers.
+\*ClientMulticast(v) ==
+\*    /\ maxc < MaxClientRequests \* Still apply global request limit
+\*    /\ pendingRequests' = [i \in Server |-> pendingRequests[i] \cup {v}]
+\*    /\ maxc' = maxc + 1 \* Increment count when request enters the system
+\*    /\ UNCHANGED <<messages, serverVars, candidateVars, leaderVars, logVars,
+\*                   leaderCount, entryCommitStats, missingRequests>>
 
 
 \* --- HovercRaft Change: Leader orders a request ---
@@ -212,7 +236,7 @@ AppendEntries(i, j) ==
             THEN [entryCommitStats EXCEPT ![entryKey].sentCount = @ + 1]
             ELSE entryCommitStats
     /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, maxc, leaderCount,
-                   pendingRequests, missingRequests>>
+                   pendingRequests, missingRequests>> \* pendingRequests is UNCHANGED here
 
 
 \* --- HovercRaft Actions: Recovery Mechanism (Helper Action) ---
@@ -253,7 +277,7 @@ HandleAppendEntriesRequest(i, j, m) ==
                                mmatchIndex     |-> m.mprevLogIndex + Len(m.mentries),
                                msource         |-> i,
                                mdest           |-> j], m)
-                     /\ UNCHANGED <<serverVars, log, pendingRequests, missingRequests>>
+                     /\ UNCHANGED <<serverVars, log, pendingRequests, missingRequests>> \* pendingRequests is UNCHANGED here
                   \/ \* Conflict: remove entries (same logic as before)
                      /\ m.mentries /= << >>
                      /\ Len(log[i]) >= index
@@ -261,7 +285,7 @@ HandleAppendEntriesRequest(i, j, m) ==
                      /\ LET newLog == SubSeq(log[i], 1, index - 1)
                         IN log' = [log EXCEPT ![i] = newLog]
                      \* Reply implicitly handled by leader retry on failure (no Reply action here)
-                     /\ UNCHANGED <<serverVars, commitIndex, messages, pendingRequests, missingRequests>>
+                     /\ UNCHANGED <<serverVars, commitIndex, messages, pendingRequests, missingRequests>> \* pendingRequests is UNCHANGED here
                   \/ \* Append new entry: Check for payload before appending
                      /\ m.mentries /= << >>
                      /\ Len(log[i]) = m.mprevLogIndex
@@ -292,7 +316,7 @@ HandleAppendEntriesRequest(i, j, m) ==
                                  THEN /\ SendRecoveryRequest(i, j, payloadValue) \* Update (messages' again)
                                       /\ missingRequests' = [missingRequests EXCEPT ![i] = missingRequests[i] \cup {payloadValue}] \* Update (missingRequests')
                                  ELSE /\ UNCHANGED <<messages, missingRequests>> \* Update (no change to these if already requested)
-                              /\ UNCHANGED <<serverVars, log, commitIndex, pendingRequests>> \* Update (others)
+                              /\ UNCHANGED <<serverVars, log, commitIndex, pendingRequests>> \* pendingRequests is UNCHANGED here
 
     IN /\ m.mterm <= currentTerm[i]  \* Overall precondition
        /\ ( \* Start of main disjunction for handling paths
@@ -308,13 +332,13 @@ HandleAppendEntriesRequest(i, j, m) ==
                              mmatchIndex     |-> 0,
                              msource         |-> i,
                              mdest           |-> j], m)
-                   /\ UNCHANGED <<serverVars, logVars, pendingRequests, missingRequests>> \* State if rejected
+                   /\ UNCHANGED <<serverVars, logVars, pendingRequests, missingRequests>> \* State if rejected and pendingRequests is UNCHANGED here
 
              \/ /\ \* Path 2: Step down if candidate
                    m.mterm = currentTerm[i]
                    /\ state[i] = Candidate
                    /\ state' = [state EXCEPT ![i] = Follower] \* Action if stepping down
-                   /\ UNCHANGED <<currentTerm, votedFor, logVars, messages, pendingRequests, missingRequests>> \* State if stepping down
+                   /\ UNCHANGED <<currentTerm, votedFor, logVars, messages, pendingRequests, missingRequests>> \* State if stepping down and pendingRequests is UNCHANGED here
 
              \/ /\ \* Path 3: Accept request (or trigger recovery)
                    acceptRequestLogic(state[i]) \* This LET definition contains the complex logic for accepting/recovering
@@ -341,7 +365,7 @@ HandleRecoveryRequest(i, j, m) ==
                       mdest         |-> j], m)
           ELSE Discard(m) \* Leader doesn't have it (maybe lost leadership?), ignore.
        /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars,
-                      pendingRequests, missingRequests>>
+                      pendingRequests, missingRequests>> \* pendingRequests is UNCHANGED here
 
 \* Follower i handles RecoveryResponse for value v from leader j
 HandleRecoveryResponse(i, j, m) ==
@@ -351,7 +375,7 @@ HandleRecoveryResponse(i, j, m) ==
             /\ missingRequests' = [missingRequests EXCEPT ![i] = missingRequests[i] \ {recoveredValue}]
             /\ Discard(m)
        ) \* End group
-    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars>>
+    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars>> \* pendingRequests is UNCHANGED here
 
 
 \* HandleAppendEntriesResponse: No changes needed for HovercRaft core logic.
@@ -381,7 +405,7 @@ HandleAppendEntriesResponse(i, j, m) ==
           /\ UNCHANGED <<matchIndex, entryCommitStats>>
     /\ Discard(m)
     /\ UNCHANGED <<serverVars, candidateVars, logVars, maxc, leaderCount,
-                   pendingRequests, missingRequests>>
+                   pendingRequests, missingRequests>> \* pendingRequests is UNCHANGED here
 
 \* Leader i advances its commitIndex.
 \* This is done as a separate step from handling AppendEntries responses,
@@ -420,12 +444,12 @@ AdvanceCommitIndex(i) ==
 \* The network duplicates a message
 DuplicateMessage(m) ==
     /\ Send(m)
-    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars>>
+    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars, pendingRequests, missingRequests>>
 
 \* The network drops a message
 DropMessage(m) ==
     /\ Discard(m)
-    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars>>
+    /\ UNCHANGED <<serverVars, candidateVars, leaderVars, logVars, instrumentationVars, pendingRequests, missingRequests>>
 
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu

@@ -22,9 +22,13 @@ VARIABLE maxc
 VARIABLE entryCommitStats
 
 \* --- HovercRaft Additions ---
-\* Stores payloads received via multicast but not yet ordered by the leader.
+\* Stores payloads received but not yet ordered.
+\* For Servers: payloads received from Switch.
+\* For Switch: payloads received from Client.
 VARIABLE pendingRequests
-\* Stores payloads identified as missing for which recovery has been requested.
+
+\* Stores payloads identified as missing by Servers for which recovery has been requested.
+\* Switch does not participate in recovery this way.
 VARIABLE missingRequests
 
 instrumentationVars == <<leaderCount, maxc, entryCommitStats>>
