@@ -21,6 +21,16 @@ VARIABLE maxc
 \*   committed |-> Bool ] \* Flag indicating if the entry is committed
 VARIABLE entryCommitStats
 
+\* --- HovercRaft Additions ---
+\* Stores payloads received but not yet ordered.
+\* For Servers: payloads received from Switch.
+\* For Switch: payloads received from Client.
+VARIABLE pendingRequests
+
+\* Stores payloads identified as missing by Servers for which recovery has been requested.
+\* Switch does not participate in recovery this way.
+VARIABLE missingRequests
+
 instrumentationVars == <<leaderCount, maxc, entryCommitStats>>
 
 \* The following variables are all per server (functions with domain Server).
@@ -65,7 +75,8 @@ VARIABLE matchIndex
 leaderVars == <<nextIndex, matchIndex>>
 
 \* All variables; used for stuttering (asserting state hasn't changed).
-vars == <<messages, serverVars, candidateVars, leaderVars, logVars, instrumentationVars>>
-
+\* Updated to include HovercRaft variables
+vars == <<messages, serverVars, candidateVars, leaderVars, logVars, instrumentationVars,
+          pendingRequests, missingRequests>>
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu
