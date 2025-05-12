@@ -18,22 +18,22 @@
 		<link>
 			<name>raftActionsSolution.tla</name>
 			<type>1</type>
-			<location>C:/Users/parsa/Desktop/TLA-Course/ProjectRaft/raft.tla/raftActionsSolution.tla</location>
+			<locationURI>PARENT-1-PROJECT_LOC/raftActionsSolution.tla</locationURI>
 		</link>
 		<link>
 			<name>raftConstants.tla</name>
 			<type>1</type>
-			<location>C:/Users/parsa/Desktop/TLA-Course/ProjectRaft/raft.tla/raftConstants.tla</location>
+			<locationURI>PARENT-1-PROJECT_LOC/raftConstants.tla</locationURI>
 		</link>
 		<link>
 			<name>raftHelpers.tla</name>
 			<type>1</type>
-			<location>C:/Users/parsa/Desktop/TLA-Course/ProjectRaft/raft.tla/raftHelpers.tla</location>
+			<locationURI>PARENT-1-PROJECT_LOC/raftHelpers.tla</locationURI>
 		</link>
 		<link>
 			<name>raftInit.tla</name>
 			<type>1</type>
-			<location>C:/Users/parsa/Desktop/TLA-Course/ProjectRaft/raft.tla/raftInit.tla</location>
+			<locationURI>PARENT-1-PROJECT_LOC/raftInit.tla</locationURI>
 		</link>
 		<link>
 			<name>raftModelPerf.tla</name>
@@ -43,12 +43,12 @@
 		<link>
 			<name>raftSpec.tla</name>
 			<type>1</type>
-			<location>C:/Users/parsa/Desktop/TLA-Course/ProjectRaft/raft.tla/raftSpec.tla</location>
+			<locationURI>PARENT-1-PROJECT_LOC/raftSpec.tla</locationURI>
 		</link>
 		<link>
 			<name>raftVariables.tla</name>
 			<type>1</type>
-			<location>C:/Users/parsa/Desktop/TLA-Course/ProjectRaft/raft.tla/raftVariables.tla</location>
+			<locationURI>PARENT-1-PROJECT_LOC/raftVariables.tla</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

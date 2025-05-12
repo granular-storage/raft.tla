@@ -7,12 +7,12 @@
     <intAttribute key="dfidDepth" value="100"/>
     <booleanAttribute key="dfidMode" value="false"/>
     <intAttribute key="distributedFPSetCount" value="0"/>
-    <stringAttribute key="distributedNetworkInterface" value="192.168.0.107"/>
+    <stringAttribute key="distributedNetworkInterface" value="10.167.35.44"/>
     <intAttribute key="distributedNodesCount" value="1"/>
     <stringAttribute key="distributedTLC" value="off"/>
     <stringAttribute key="distributedTLCVMArgs" value=""/>
     <intAttribute key="fpBits" value="1"/>
-    <intAttribute key="fpIndex" value="23"/>
+    <intAttribute key="fpIndex" value="9"/>
     <booleanAttribute key="fpIndexRandom" value="true"/>
     <intAttribute key="maxHeapSize" value="25"/>
     <intAttribute key="maxSetSize" value="1000000"/>
@@ -29,7 +29,7 @@
         <listEntry value="1LogMatchingInv"/>
         <listEntry value="1LeaderCompletenessInv"/>
         <listEntry value="1LogInv"/>
-        <listEntry value="0LeaderCommitted"/>
+        <listEntry value="1LeaderCommitted"/>
         <listEntry value="1MaxCInv"/>
         <listEntry value="1LeaderCountInv"/>
         <listEntry value="1MaxTermInv"/>
