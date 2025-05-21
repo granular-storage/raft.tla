@@ -1,8 +1,6 @@
 ---------------------------- MODULE raftActionsSolution ----------------------------
 
 EXTENDS raftInit
-
-----
 \* Define state transitions
 
 \* Modified to allow Restarts only for Leaders

@@ -78,27 +78,6 @@ MySwitchInit ==
     /\ votesResponded = [s \in Server |-> IF s = r2 THEN {r1, r3, r4} ELSE {}]
     /\ entryCommitStats = [ idx_term \in {} |-> [ sentCount |-> 0, ackCount |-> 0, committed |-> FALSE ] ] \* Initialize here too
 
-\* to be used directly in model Init the value
-\*MyInit2 ==
-\*    /\  commitIndex = (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0)
-\*    /\  currentTerm = (r1 :> 2 @@ r2 :> 2 @@ r3 :> 2)
-\*    /\  entryCommitStats = << >>
-\*    /\  leaderCount = (r1 :> 1 @@ r2 :> 0 @@ r3 :> 0)
-\*    /\  log = (r1 :> <<>> @@ r2 :> <<>> @@ r3 :> <<>>)
-\*    /\  matchIndex = ( r1 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
-\*      r2 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) @@
-\*      r3 :> (r1 :> 0 @@ r2 :> 0 @@ r3 :> 0) )
-\*    /\  maxc = 0
-\*    /\  messages = << >>
-\*    /\  nextIndex = ( r1 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
-\*      r2 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) @@
-\*      r3 :> (r1 :> 1 @@ r2 :> 1 @@ r3 :> 1) )
-\*    /\  state = (r1 :> Leader @@ r2 :> Follower @@ r3 :> Follower)
-\*    /\  votedFor = (r1 :> Nil @@ r2 :> r1 @@ r3 :> r1)
-\*    /\  voterLog = (r1 :> (r1 :> <<>>) @@ r2 :> <<>> @@ r3 :> <<>>)
-\*    /\  votesGranted = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
-\*    /\  votesResponded = (r1 :> {r1} @@ r2 :> {} @@ r3 :> {})
-
 
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu

@@ -1,4 +1,5 @@
 ------------------------------ MODULE raftSpec ------------------------------
+
 \* This is the formal specification for the Raft consensus algorithm.
 \* Modified by Ovidiu Marcu. Simplified model and performance invariants added.
 \* Modified further to track message counts for entry commitment.
@@ -7,9 +8,15 @@
 \* This work is licensed under the Creative Commons Attribution-4.0
 \* International License https://creativecommons.org/licenses/by/4.0/
 
-EXTENDS raftActionsSolution
+EXTENDS Naturals, Sequences, FiniteSets, TLC,
+        raftConstants, raftVariables, raftHelpers, raftInit,
+        raftActionsSolution
+        
 
-\* Receive a message.
+
+MySpecInit == MyInit 
+
+
 Receive(m) ==
     LET i == m.mdest
         j == m.msource
@@ -116,4 +123,3 @@ LogInv ==
 THEOREM Spec => ([]LogInv /\ []LeaderCompletenessInv /\ []LogMatchingInv /\ []MoreThanOneLeaderInv) 
 
 =============================================================================
-\* Created by Ovidiu-Cristian Marcu

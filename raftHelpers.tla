@@ -1,6 +1,5 @@
 ---------------------------- MODULE raftHelpers ----------------------------
-
-EXTENDS raftVariables
+EXTENDS raftVariables, Naturals, Sequences, FiniteSets
 
 \* The set of all quorums. This just calculates simple majorities, but the only
 \* important property is that every quorum overlaps with every other.
@@ -73,21 +72,6 @@ MyConstraint == (\A i \in Servers: currentTerm[i] <= MaxTerm /\ Len(log[i]) <= M
 
 Symmetry == Permutations(Servers)
 
-\* new bag of messages with one more m in it. the following from orig spec necessary for Drop
-\*WithMessage(m, msgs) ==
-\*    IF m \in DOMAIN msgs THEN
-\*        [msgs EXCEPT ![m] = msgs[m] + 1]
-\*    ELSE
-\*        msgs @@ (m :> 1)
-
-\* Helper for Discard and Reply. Given a message m and bag of messages, return
-\* a new bag of messages with one less m in it.
-\*WithoutMessage(m, msgs) ==
-\*    IF m \in DOMAIN msgs THEN
-\*        IF msgs[m] <= 1 THEN [i \in DOMAIN msgs \ {m} |-> msgs[i]]
-\*        ELSE [msgs EXCEPT ![m] = msgs[m] - 1]
-\*    ELSE
-\*        msgs
 
 =============================================================================
-\* Created by Ovidiu-Cristian Marcu
+\* Created by Ovidiu-Cristian Marcu on behalf of the user

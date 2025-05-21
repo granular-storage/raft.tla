@@ -40,7 +40,9 @@ EntryCommitAckQuorumInv ==
 
 \* fake inv to obtain a trace
 LeaderCommitted ==
-    \E i \in Servers : commitIndex[i] /= 1 \*
+    \E i \in Servers : commitIndex[i] /= 1
+
+\* FollowerAppendEntry
 
 \*Modify LeaderCommited == \E i \in Server : commitIndex[i] /= 1
 \*and run with MySpec OR

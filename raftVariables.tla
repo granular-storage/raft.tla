@@ -1,5 +1,4 @@
 --------------------------- MODULE raftVariables ---------------------------
-
 EXTENDS raftConstants
 
 \* Global variables
@@ -90,3 +89,6 @@ vars == <<messages, serverVars, candidateVars, leaderVars, logVars, instrumentat
 
 =============================================================================
 \* Created by Ovidiu-Cristian Marcu
+
+
+
